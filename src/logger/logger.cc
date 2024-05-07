@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Rdg;
 
-const char *LOG_LEVELS[] = {"Error", "Warning", "Info"};
+const char *LOG_LEVELS[] = {"Error  ", "Warning", "Info   "};
 
 void Logger::log(const string &message, ostream &stream, int level) {
   auto now = time(nullptr);
