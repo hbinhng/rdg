@@ -1,7 +1,8 @@
-#include "./rdg-server.h"
-#include "logger/logger.h"
+#include "rdg-server.h"
+#include "../logger/logger.h"
 
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <string>
 #include <sys/socket.h>
 
@@ -46,5 +47,27 @@ RdgServer::RdgServer(string host, int port) {
 }
 
 void RdgServer::run() {
-  Logger::info("RDG server started, accepting new connections");
+  this->mainThread = new thread(RdgServer::mainThreadRoutine, this);
+
+  this->mainThread->join();
+}
+
+int RdgServer::getSockFd() { return this->sockFd; }
+
+void RdgServer::mainThreadRoutine(RdgServer *rdg) {
+  Logger::info("RDG main thread started, accepting new connections");
+
+  while (1) {
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddressLen = sizeof(clientAddress);
+
+    auto fd = accept(rdg->getSockFd(), (struct sockaddr *)&clientAddress,
+                     &clientAddressLen);
+
+    Logger::info("New client connected");
+
+    auto session = new Session(fd);
+
+    session->fork();
+  }
 }
